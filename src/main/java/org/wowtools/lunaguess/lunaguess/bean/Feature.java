@@ -12,9 +12,18 @@ public class Feature {
 	private Property[] properties;
 
 	/**
-	 * 属性权重
+	 * 要素id。必须能唯一地标识要素，如帖子id
 	 */
-	private double[] propertyWeights;
+	private String id;
+
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
 
 	public Property[] getProperties() {
 		return properties;
@@ -22,14 +31,6 @@ public class Feature {
 
 	public void setProperties(Property[] properties) {
 		this.properties = properties;
-	}
-
-	public double[] getPropertyWeights() {
-		return propertyWeights;
-	}
-
-	public void setPropertyWeights(double[] propertyWeights) {
-		this.propertyWeights = propertyWeights;
 	}
 
 }
