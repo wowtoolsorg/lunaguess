@@ -15,6 +15,20 @@ public class Property {
 	 * 属性值/内容
 	 */
 	private String content;
+	
+	/**
+	 * 
+	 * @param name 属性名称
+	 * @param content 属性值/内容
+	 */
+	public Property(String name,String content){
+		this.name = name;
+		this.content = content;
+	}
+	
+	public Property(){
+		
+	}
 
 	public String getName() {
 		return name;

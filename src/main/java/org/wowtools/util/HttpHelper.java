@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
@@ -38,6 +39,8 @@ import org.apache.http.util.EntityUtils;
 public class HttpHelper {
 
 	private HttpClient client = HttpClientBuilder.create().build();
+	
+	private static final Charset charsetUtf8 = Charset.forName("UTF-8") ;
 
 	/**
 	 * 使用get方式访问url，可用?在url后面添加参数
@@ -81,12 +84,12 @@ public class HttpHelper {
 	}
 
 	public String doPost(String url,String entity) throws ClientProtocolException, IOException{
-		StringEntity httpEntity = new StringEntity(entity);
+		StringEntity httpEntity = new StringEntity(entity,charsetUtf8);
 		return doPost(url, httpEntity);
 	}
 
 	public void doPostNotReturn(String url,String entity) throws ClientProtocolException, IOException{
-		StringEntity httpEntity = new StringEntity(entity);
+		StringEntity httpEntity = new StringEntity(entity,charsetUtf8);
 		doPostNotReturn(url, httpEntity);
 	}
 
