@@ -1,6 +1,5 @@
 package org.wowtools.lunaguess.lunaguess;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -9,7 +8,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import org.apache.http.client.ClientProtocolException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wowtools.lunaguess.lunaguess.bean.Feature;
