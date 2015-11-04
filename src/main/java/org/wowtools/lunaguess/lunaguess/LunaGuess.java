@@ -1,14 +1,11 @@
 package org.wowtools.lunaguess.lunaguess;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import org.apache.http.client.ClientProtocolException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wowtools.lunaguess.lunaguess.bean.Feature;
@@ -83,13 +80,24 @@ public class LunaGuess {
 	/**
 	 * 使索引支持中文分词，feature中包含中文时务必调用此方法
 	 */
-	public void initIkAnalyzer() {
-		StringBuffer sbUrl = getRandomUrl();
+	public void initIkAnalyzer(String[] propertyNames) {
+		String url = getRandomUrl().toString();
 		try {
-			hh.doGetNotReturn(sbUrl.append("_close").toString());
+			//设置索引的分词
+			hh.doGetNotReturn(url+"_close");
 			String param = "{\"analysis\": {\"analyzer\":{\"ikAnalyzer\":{\"type\":\"org.elasticsearch.index.analysis.IkAnalyzerProvider\",\"alias\":\"ik\"}}}}";
-			hh.doPostNotReturn(sbUrl.append("_settings").toString(), param);
-			// hh.doGetNotReturn(sbUrl.append("_open").toString());
+			hh.doPostNotReturn(url+"_settings", param);
+//			hh.doGetNotReturn(url+"_open");
+			//设置mapping的分词
+			StringBuffer sbMapping = new StringBuffer();
+			sbMapping.append("{\"properties\":{");
+			int n = propertyNames.length-1;
+			for(int i = 0;i<n;i++){
+				sbMapping.append("\"").append(propertyNames[i]).append("\":{\"type\":\"string\",\"indexAnalyzer\":\"ik\",\"searchAnalyzer\":\"ik\"},");
+			}
+			sbMapping.append("\"").append(propertyNames[n]).append("\":{\"type\":\"string\",\"indexAnalyzer\":\"ik\",\"searchAnalyzer\":\"ik\"}}}");
+			String res = hh.doPost(url+featureTypeName+"/_mapping", sbMapping.toString());
+			System.out.println(res);
 		} catch (Exception e) {
 			throw new RuntimeException("在es中构建behavior和feature的nested-parent关系异常:", e);
 		}
@@ -97,7 +105,7 @@ public class LunaGuess {
 
 	/**
 	 * 批量添加要素
-	 * 
+	 *
 	 * @param features
 	 *            要素，如帖子
 	 * @param needReturn
@@ -182,7 +190,7 @@ public class LunaGuess {
 			throw new RuntimeException("bulkAddBehavior异常:", e);
 		}
 	}
-	
+
 	/**
 	 * 分析用户行为产生的关键字。如用户浏览的帖子中出现最多的词汇
 	 * @param uid 用户唯一标识
@@ -238,7 +246,7 @@ public class LunaGuess {
 			throw new RuntimeException("analyzeBehaviorKeyWords异常:", e);
 		}
 	}
-	
+
 
 	private StringBuffer getRandomUrl() {
 		StringBuffer sb = new StringBuffer();
