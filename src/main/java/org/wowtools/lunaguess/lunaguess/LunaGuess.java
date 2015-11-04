@@ -294,9 +294,9 @@ public class LunaGuess {
 				JSONObject joConstantScore = new JSONObject();
 				joShould.put("constant_score", joConstantScore);
 				JSONObject joFilter = new JSONObject();
-				joConstantScore.put("filter", joFilter);
+				joConstantScore.put("query", joFilter);
 				JSONObject joTerm = new JSONObject();
-				joFilter.put("term", joTerm);
+				joFilter.put("match", joTerm);
 				joTerm.put(propertyName, kw.getValue());
 				if (kw.isNeedWeight()) {
 					joConstantScore.put("boost", kw.getWeight());
