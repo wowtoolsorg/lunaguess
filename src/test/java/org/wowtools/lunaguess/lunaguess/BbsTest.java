@@ -1,7 +1,11 @@
 package org.wowtools.lunaguess.lunaguess;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.wowtools.lunaguess.lunaguess.bean.Feature;
 import org.wowtools.lunaguess.lunaguess.bean.KeyWord;
@@ -31,23 +35,27 @@ public class BbsTest {
 	 */
 	private static String behaviorTypeName = "ReadingHistory";
 
+	/**
+	 * 模拟生成的帖子数
+	 */
+	private static int topicCount = 500;
+
+	/**
+	 * 每个帖子平均有几个词(10%的波动)
+	 */
+	private static int topicWordNum = 350;
+
+	/**
+	 * 模拟用户tom阅读了多少帖子
+	 */
+	private static int tomReadNum = 100;
+
 	private static LunaGuess lunaGuess = new LunaGuess(esUrls, idxName, featureTypeName, behaviorTypeName);
 
 	public static void main(String[] args) throws Exception {
-		lunaGuess.initIkAnalyzer( new String[]{"title","content"});//帖子中有中文信息，所以调用initIkAnalyzer来支持ik插件的中文分词
-		System.out.println("initIkAnalyzer success");
+		//模拟生成一些帖子数据和浏览记录
+		initData();
 
-		/** 模拟生成3个帖子，并作为要素存入LunaGuess **/
-		Feature[] topics = build3Topics();
-		lunaGuess.bulkAddFeature(topics, false);
-		System.out.println("bulkAddFeature success");
-
-		/** 模拟用户tom、lily浏览帖子帖子，并将其浏览记录作为行为存入LunaGuess **/
-		//tom阅读了topic1、topic2、topic1；lily阅读了topic2、topic3
-		String[] readIds = new String[]{"topic1","topic2","topic1","topic2","topic3"};
-		String[] userIds = new String[]{"tom","tom","tom","lily","lily"};
-		lunaGuess.bulkAddBehavior(readIds, userIds, false);
-		System.out.println("bulkAddBehavior success");
 
 		/** 查询tom最感兴趣的帖子正文中的关键字 **/
 		Map<String, List<KeyWord>> favoriteKwMap = lunaGuess.analyzeBehaviorKeyWords("tom", new String[]{"content"}, 2);
@@ -59,75 +67,75 @@ public class BbsTest {
 		}
 	}
 
+	private static void initData(){
+		lunaGuess.initIkAnalyzer( new String[]{"title","content"});//帖子中有中文信息，所以调用initIkAnalyzer来支持ik插件的中文分词
+		System.out.println("initIkAnalyzer success");
+
+		/** 模拟生成几个帖子，并作为要素存入LunaGuess **/
+		Feature[] topics = buildTopics(topicCount,topicWordNum);
+		lunaGuess.bulkAddFeature(topics, false);
+		System.out.println("bulkAddFeature success");
+
+		/** 模拟用户tom浏览帖子，并将其浏览记录作为行为存入LunaGuess **/
+		String[] readIds = new String[tomReadNum];
+		String[] userIds = new String[tomReadNum];
+		Random r = new Random();
+		for(int i = 0;i<tomReadNum;i++){
+			readIds[i] = "topic"+r.nextInt(topicCount);
+			userIds[i] = "tom";
+		}
+		lunaGuess.bulkAddBehavior(readIds, userIds, false);
+		System.out.println("bulkAddBehavior success");
+	}
+
 	/**
-	 * 模拟生成3个帖子，帖子包括标题(title)和内容
+	 * 模拟生成几个帖子，帖子包括标题(title)和内容
 	 * @return
 	 */
-	private static Feature[] build3Topics(){
-		Feature topic1 = new Feature();
-		topic1.setId("topic1");
-		topic1.setProperties(new Property[]{
-				new Property("title","这是我的第一个帖子"),//标题
-				new Property("content","新人发帖，请多关照O(∩_∩)O~"),//内容
-		});
-
-		Feature topic2 = new Feature();
-		topic2.setId("topic2");
-		topic2.setProperties(new Property[]{
-				new Property("title","Java反射的性能如何"),//标题
-				new Property("content","getField方法非常耗时，set/get方法是很快的"),//内容
-		});
-
-		Feature topic3 = new Feature();
-		topic3.setId("topic3");
-		topic3.setProperties(new Property[]{
-				new Property("title","如何正确使用设计模式"),//标题
-				new Property("content","好的架构不是设计出来的，而是进化出来的"),//内容
-		});
-
-		Feature[] topics = new Feature[]{topic1,topic2,topic3};
+	private static Feature[] buildTopics(int topicCount,int wordNum){
+		String[] words = readWords();
+		Feature[] topics = new Feature[topicCount];
+		for(int i = 0;i<topics.length;i++){
+			Feature topic = new Feature();
+			topic.setId("topic"+i);
+			topic.setProperties(new Property[]{
+					new Property("title",buildText(words, 10)),
+					new Property("content",buildText(words, wordNum)),
+			});
+			topics[i] = topic;
+		}
 		return topics;
 	}
 
-}
+	private static String[] readWords(){
+		String res = null;
+		String classPath;
+		classPath = BbsTest.class.getClassLoader().getResource("/")!=null?
+				BbsTest.class.getClassLoader().getResource("/").getPath():
+					BbsTest.class.getResource("/").getPath();
+		classPath = classPath.replace("%20", " ");
+		File file = new File(classPath+"words.dic") ;
+		try {
+			InputStream is = new FileInputStream(file) ;
+			byte b[] = new byte[is.available()] ;
+			is.read(b) ;
+			res = new String(b);
+			is.close() ;
 
-/*
- *
-{
-   "properties": {
-            "description": {
-                "type": "string",
-                "indexAnalyzer":"ik",
-                "searchAnalyzer":"ik"
-            },
-            "title": {
-                "type": "string",
-                "indexAnalyzer":"ik",
-                "searchAnalyzer":"ik"
-            }
-        }
-}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return res.split("\n");
+	}
 
-GET /wowtools/Topic/_search
-{
-  "query": {
-    "has_child": {
-      "type": "ReadingHistory",
-      "query": {
-        "term": {
-          "uid": {
-            "value": "tom"
-          }
-        }
-      }
-    }
-  },
-  "aggs": {
-    "NAME": {
-      "significant_terms": {
-        "field": "content"
-      }
-    }
-  }
+	private static String buildText(String[] words,int wordNum){
+		Random r = new Random();
+		StringBuffer sb = new StringBuffer();
+		wordNum = (int) ((0.9+Math.random()*0.2)*wordNum);
+		for(int i = 0;i<wordNum;i++){
+			sb.append(words[r.nextInt(words.length)].trim());
+		}
+		return sb.toString();
+	}
+
 }
-*/

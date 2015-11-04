@@ -201,21 +201,21 @@ public class LunaGuess {
 		StringBuffer sbParam = new StringBuffer();
 		sbParam.append("{");
 		//过滤条件
-		sbParam.append("\"query\":{\"filtered\":{\"filter\":{\"term\":{\"uid\":\"");
+		sbParam.append("\"query\":{\"filtered\":{\"filter\":{\"has_child\":{\"type\": \"").append(behaviorTypeName).append("\",\"query\": {\"term\":{\"uid\":\"");
 		sbParam.append(uid);
-		sbParam.append("\"}}}},");
+		sbParam.append("\"}}}}}},");
 		//聚合各属性中的关键字
 		int n = propertyNames.length-1;
 		sbParam.append("\"aggs\":{");
 		for(int i = 0;i<n;i++){
 			String property = propertyNames[i];
 			sbParam.append("\"").append(property).append("\":{\"terms\":{\"field\":\"")
-			.append(property).append("\",\"size\":").append("}},");
+			.append(property).append("\",\"size\":").append("}}}}},");
 		}
 		String property = propertyNames[n];
 		sbParam.append("\"").append(property).append("\":{\"significant_terms\":{\"field\":\"")
 		.append(property).append("\",\"size\":").append(maxReturn).append("}}}}");
-		StringBuffer sbUrl = getRandomUrl(behaviorTypeName).append("_search?search_type=count");
+		StringBuffer sbUrl = getRandomUrl(featureTypeName).append("_search?search_type=count");
 		try {
 			String json = hh.doPost(sbUrl.toString(), sbParam.toString());
 			JSONObject jo = new JSONObject(json);
