@@ -12,9 +12,11 @@ public class KeyWord {
 	private String value;
 	
 	/**
-	 * 权重
+	 * 权重，默认值1
 	 */
 	private double weight;
+	
+	private boolean needWeight = false;
 
 	public String getValue() {
 		return value;
@@ -30,6 +32,11 @@ public class KeyWord {
 
 	public void setWeight(double weight) {
 		this.weight = weight;
+		needWeight = true;
+	}
+
+	public boolean isNeedWeight() {
+		return needWeight;
 	}
 	
 }

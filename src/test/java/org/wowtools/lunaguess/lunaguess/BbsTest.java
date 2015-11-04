@@ -63,7 +63,15 @@ public class BbsTest {
 		System.out.println("tom最感兴趣的正文关键字:");
 		System.out.println("关键字\t权重");
 		for(KeyWord kw:favoriteKwInContent){
-			System.out.print(kw.getValue()+"\t"+kw.getWeight());
+			System.out.println(kw.getValue()+"\t"+kw.getWeight());
+		}
+		System.out.println("-----------------------");
+		/** 根据查到的关键字，查询tom最喜欢的文章 **/
+		List<Feature> favoriteTopics = lunaGuess.searchFeatureByKeyWord(new String[]{"title"}, favoriteKwMap, 3);
+		System.out.println("tom最喜欢的文章:");
+		System.out.println("id\t标题");
+		for(Feature ft:favoriteTopics){
+			System.out.println(ft.getId()+"\t"+ft.getProperties()[0].getContent());
 		}
 	}
 
