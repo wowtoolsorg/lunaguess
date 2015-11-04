@@ -96,8 +96,7 @@ public class LunaGuess {
 				sbMapping.append("\"").append(propertyNames[i]).append("\":{\"type\":\"string\",\"indexAnalyzer\":\"ik\",\"searchAnalyzer\":\"ik\"},");
 			}
 			sbMapping.append("\"").append(propertyNames[n]).append("\":{\"type\":\"string\",\"indexAnalyzer\":\"ik\",\"searchAnalyzer\":\"ik\"}}}");
-			String res = hh.doPost(url+featureTypeName+"/_mapping", sbMapping.toString());
-			System.out.println(res);
+			hh.doPostNotReturn(url+featureTypeName+"/_mapping", sbMapping.toString());
 		} catch (Exception e) {
 			throw new RuntimeException("在es中构建behavior和feature的nested-parent关系异常:", e);
 		}
