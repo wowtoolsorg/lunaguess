@@ -265,8 +265,8 @@ public class LunaGuess {
 		sbParam.append("\"aggs\":{");
 		for (int i = 0; i < n; i++) {
 			String property = propertyNames[i];
-			sbParam.append("\"").append(property).append("\":{\"terms\":{\"field\":\"").append(property)
-					.append("\",\"size\":").append("}}}}},");
+			sbParam.append("\"").append(property).append("\":{\"significant_terms\":{\"field\":\"").append(property)
+			.append("\",\"size\":").append(maxReturn).append("}}}}");
 		}
 		String property = propertyNames[n];
 		sbParam.append("\"").append(property).append("\":{\"significant_terms\":{\"field\":\"").append(property)
