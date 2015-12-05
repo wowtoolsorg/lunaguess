@@ -2,14 +2,17 @@ package org.wowtools.lunaguess.lunaguess;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.http.client.ClientProtocolException;
 import org.wowtools.lunaguess.lunaguess.bean.Feature;
 import org.wowtools.lunaguess.lunaguess.bean.KeyWord;
 import org.wowtools.lunaguess.lunaguess.bean.Property;
+import org.wowtools.util.HttpHelper;
 
 /**
  * 以一个论坛系统中分析用户最喜好的帖子为例，介绍lunaguess的用法
@@ -38,7 +41,7 @@ public class BbsTest {
 	/**
 	 * 模拟生成的帖子数
 	 */
-	private static int topicCount = 500;
+	private static int topicCount = 10;
 
 	/**
 	 * 每个帖子平均有几个词(10%的波动)
@@ -48,11 +51,18 @@ public class BbsTest {
 	/**
 	 * 模拟用户tom阅读了多少帖子
 	 */
-	private static int tomReadNum = 100;
+	private static int tomReadNum = 3;
 
-	private static LunaGuess lunaGuess = new LunaGuess(esUrls, idxName, featureTypeName, behaviorTypeName);
+	private static LunaGuess lunaGuess;
 
 	public static void main(String[] args) throws Exception {
+		//删掉旧索引
+		try {
+			new HttpHelper().doDelete(esUrls[0]+"/"+idxName);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		lunaGuess = new LunaGuess(esUrls, idxName, featureTypeName, behaviorTypeName);
 		//模拟生成一些帖子数据和浏览记录
 		initData();
 
@@ -76,6 +86,7 @@ public class BbsTest {
 	}
 
 	private static void initData(){
+		
 		lunaGuess.initIkAnalyzer( new String[]{"title","content"});//帖子中有中文信息，所以调用initIkAnalyzer来支持ik插件的中文分词
 		System.out.println("initIkAnalyzer success");
 
@@ -92,7 +103,7 @@ public class BbsTest {
 			readIds[i] = "topic"+r.nextInt(topicCount);
 			userIds[i] = "tom";
 		}
-		lunaGuess.bulkAddBehavior(readIds, userIds, false);
+		lunaGuess.bulkAddBehavior(readIds, userIds, true);
 		System.out.println("bulkAddBehavior success");
 	}
 

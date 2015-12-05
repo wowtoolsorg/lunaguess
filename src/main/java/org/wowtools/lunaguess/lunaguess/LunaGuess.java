@@ -63,17 +63,18 @@ public class LunaGuess {
 	 * 在es中构建behavior和feature的nested-parent关系
 	 **/
 	private void buildNested() {
-		try {
-			hh.doGet(getRandomUrl().toString());
-		} catch (Exception e) {
-			throw new RuntimeException("建立索引" + idxName + "异常:", e);
-		}
+		/*
+		 *构建feature和 behavior的nested-parent关系
+		 */
 		StringBuffer sbParam = new StringBuffer();
 		sbParam.append("{\"mappings\":{\"").append(behaviorTypeName).append("\":{\"_parent\":{\"type\":\"")
 				.append(featureTypeName).append("\"}}}}");
 		StringBuffer sbUrl = getRandomUrl();
 		try {
-			hh.doPostNotReturn(sbUrl.toString(), sbParam.toString());
+			String res = hh.doPut(sbUrl.toString(), sbParam.toString());
+			if(res.indexOf("error")>0){
+				throw new RuntimeException(res);
+			}
 		} catch (Exception e) {
 			throw new RuntimeException("在es中构建behavior和feature的nested-parent关系异常:", e);
 		}
@@ -86,20 +87,60 @@ public class LunaGuess {
 		String url = getRandomUrl().toString();
 		try {
 			// 设置索引的分词
-			hh.doGetNotReturn(url + "_close");
+			/*
+			 * 关索引
+			 * POST /test/_close
+			 * */
+			hh.doPostNotReturn(url + "_close","{}");
 			String param = "{\"analysis\": {\"analyzer\":{\"ikAnalyzer\":{\"type\":\"org.elasticsearch.index.analysis.IkAnalyzerProvider\",\"alias\":\"ik\"}}}}";
+			/*
+			 * 设置分词
+			 * PUT /test/_settings
+				{
+				   "analysis": {
+				      "analyzer":{
+				             "ikAnalyzer":{
+				                 "type":"org.elasticsearch.index.analysis.IkAnalyzerProvider",
+				                    "alias":"ik"
+				                }
+				            }
+				     }
+				}
+
+			 * */
 			hh.doPostNotReturn(url + "_settings", param);
-			// hh.doGetNotReturn(url+"_open");
-			// 设置mapping的分词
+			/*
+			 * 开索引
+			 * POST /test/_open
+			 * */
+			hh.doPostNotReturn(url + "_open","{}");
+			
+			/*设置mapping的分词
+			 * post /test/t/_mapping
+				{
+				  "properties": {
+				    "description": {
+				      "type": "string",
+				      "indexAnalyzer": "ikAnalyzer",
+				      "searchAnalyzer": "ikAnalyzer"
+				    },
+				    "des": {
+				      "type": "string",
+				      "indexAnalyzer": "ik_max_word",
+				      "searchAnalyzer": "ik_max_word"
+				    }
+				  }
+				}
+			 * */ 
 			StringBuffer sbMapping = new StringBuffer();
 			sbMapping.append("{\"properties\":{");
 			int n = propertyNames.length - 1;
 			for (int i = 0; i < n; i++) {
 				sbMapping.append("\"").append(propertyNames[i])
-						.append("\":{\"type\":\"string\",\"indexAnalyzer\":\"ik\",\"searchAnalyzer\":\"ik\"},");
+						.append("\":{\"type\":\"string\",\"indexAnalyzer\":\"ik_max_word\",\"searchAnalyzer\":\"ik_max_word\"},");
 			}
 			sbMapping.append("\"").append(propertyNames[n])
-					.append("\":{\"type\":\"string\",\"indexAnalyzer\":\"ik\",\"searchAnalyzer\":\"ik\"}}}");
+					.append("\":{\"type\":\"string\",\"indexAnalyzer\":\"ik_max_word\",\"searchAnalyzer\":\"ik_max_word\"}}}");
 			hh.doPostNotReturn(url + featureTypeName + "/_mapping", sbMapping.toString());
 		} catch (Exception e) {
 			throw new RuntimeException("在es中构建behavior和feature的nested-parent关系异常:", e);

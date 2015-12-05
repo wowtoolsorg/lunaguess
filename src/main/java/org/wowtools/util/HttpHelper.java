@@ -24,6 +24,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -84,8 +85,13 @@ public class HttpHelper {
 	}
 
 	public String doPost(String url,String entity) throws ClientProtocolException, IOException{
-		StringEntity httpEntity = new StringEntity(entity,charsetUtf8);
+		StringEntity httpEntity = null;
+		if(null!=entity){
+			httpEntity = new StringEntity(entity,charsetUtf8);
+			
+		}
 		return doPost(url, httpEntity);
+
 	}
 
 	public void doPostNotReturn(String url,String entity) throws ClientProtocolException, IOException{
@@ -121,7 +127,9 @@ public class HttpHelper {
 	private String doPost(String url,HttpEntity entity) throws ClientProtocolException, IOException{
 		HttpPost httpPost = new HttpPost(url);
 		httpPost.addHeader("Content-Type","application/json; charset=UTF-8");
-		httpPost.setEntity(entity);
+		if(null!=entity){
+			httpPost.setEntity(entity);
+		}
 		String res = null;
 		try {
 			HttpResponse response2 = client.execute(httpPost);
@@ -135,6 +143,42 @@ public class HttpHelper {
 			EntityUtils.consume(entity2);
 		} finally {
 			httpPost.releaseConnection();
+		}
+		return res;
+	}
+	
+	public void doPutNotReturn(String url,String entity) throws ClientProtocolException, IOException{
+		HttpPut httpPut = new HttpPut(url);
+		httpPut.addHeader("Content-Type","application/json; charset=UTF-8");
+		if(null!=entity){
+			httpPut.setEntity(new StringEntity(entity,charsetUtf8));
+		}
+		try {
+			client.execute(httpPut);
+		} finally {
+			httpPut.releaseConnection();
+		}
+	}
+	
+	public String doPut(String url,String entity) throws ClientProtocolException, IOException{
+		HttpPut httpPut = new HttpPut(url);
+		httpPut.addHeader("Content-Type","application/json; charset=UTF-8");
+		if(null!=entity){
+			httpPut.setEntity(new StringEntity(entity,charsetUtf8));
+		}
+		String res = null;
+		try {
+			HttpResponse response2 = client.execute(httpPut);
+			HttpEntity httpEntity = response2.getEntity();
+			if (httpEntity != null) {
+				res = readHtmlContentFromEntity(httpEntity);
+			}
+			HttpEntity entity2 = response2.getEntity();
+			// do something useful with the response body
+			// and ensure it is fully consumed
+			EntityUtils.consume(entity2);
+		} finally {
+			httpPut.releaseConnection();
 		}
 		return res;
 	}
