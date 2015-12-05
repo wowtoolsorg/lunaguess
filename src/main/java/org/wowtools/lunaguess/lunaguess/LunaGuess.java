@@ -56,13 +56,12 @@ public class LunaGuess {
 		this.idxName = idxName;
 		this.featureTypeName = featureTypeName;
 		this.behaviorTypeName = behaviorTypeName;
-		buildNested();
 	}
 
 	/**
 	 * 在es中构建behavior和feature的nested-parent关系
 	 **/
-	private void buildNested() {
+	public void buildNested() {
 		/*
 		 *构建feature和 behavior的nested-parent关系
 		 */

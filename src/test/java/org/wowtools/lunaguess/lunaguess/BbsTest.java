@@ -63,6 +63,7 @@ public class BbsTest {
 			e.printStackTrace();
 		}
 		lunaGuess = new LunaGuess(esUrls, idxName, featureTypeName, behaviorTypeName);
+		lunaGuess.buildNested();
 		//模拟生成一些帖子数据和浏览记录
 		initData();
 
