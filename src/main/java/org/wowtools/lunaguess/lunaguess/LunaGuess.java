@@ -187,11 +187,13 @@ public class LunaGuess {
 		// 存入featureType中
 		StringBuffer sbUrl = getRandomUrl(featureTypeName).append("_bulk");
 		try {
+			String param = sbParam.toString();
+			param = new String(param.getBytes(),"UTF-8");
 			if (needReturn) {
-				String res = hh.doPost(sbUrl.toString(), sbParam.toString());
+				String res = hh.doPost(sbUrl.toString(), param);
 				return res;
 			} else {
-				hh.doPostNotReturn(sbUrl.toString(), sbParam.toString());
+				hh.doPostNotReturn(sbUrl.toString(), param);
 				return null;
 			}
 		} catch (Exception e) {
@@ -221,12 +223,16 @@ public class LunaGuess {
 		}
 		// 存入behaviorType中
 		StringBuffer sbUrl = getRandomUrl(behaviorTypeName).append("_bulk");
+
 		try {
+			String param = sbParam.toString();
+			param = new String(param.getBytes(),"UTF-8");
 			if (needReturn) {
-				String res = hh.doPost(sbUrl.toString(), sbParam.toString());
+				String res = hh.doPost(sbUrl.toString(), param);
 				return res;
 			} else {
-				hh.doPostNotReturn(sbUrl.toString(), sbParam.toString());
+				String res = hh.doPost(sbUrl.toString(), param);
+				hh.doPostNotReturn(sbUrl.toString(), param);
 				return null;
 			}
 		} catch (Exception e) {
